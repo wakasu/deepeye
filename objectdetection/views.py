@@ -25,9 +25,9 @@ def dataset(request):
             print("Form validated")
             # Saving the uploaded files to the dataset folder
             # TODO making sure the required files are provided
-            # for f in tqdm(files):
-            #     print("Form validated")
-            #     default_storage.save(os.path.join(form.cleaned_data['dataset_name'], 'temp' , str(f)), ContentFile(f.read()))  
+            for f in tqdm(files):
+                print("Form validated")
+                default_storage.save(os.path.join(form.cleaned_data['dataset_name'], 'temp' , str(f)), ContentFile(f.read()))  
 
             dataset_path = os.path.join(MEDIA_ROOT, form.cleaned_data['dataset_name'])
             dataset_name = form.cleaned_data['dataset_name']
