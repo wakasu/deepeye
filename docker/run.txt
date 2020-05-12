@@ -1,0 +1,29 @@
+#Ubuntu
+docker build ./docker/ --add-host 127.0.0.1:0.0.0.0 --label deepeye --tag deepeye:v1
+docker run -it -u $(id -u):$(id -g) --name deepeye -p 8000:8000 -v deepeye:v1 /bin/bash
+#Windows
+docker build ./docker/ --add-host 127.0.0.1:0.0.0.0 --label deepeye --tag deepeye:v1
+docker run -it --privileged --name deepeye -p 8000:8000 deepeye:v1 /bin/bash 
+
+
+mount -t cifs -o username=jwmnwq,password=damedesu,uid=$(id -u),gid=$(id -g) //192.168.2.14/Users/JawadMianWaqas/deep-eye/web-app ../code
+
+python manage.py runserver 0.0.0.0:8000
+
+
+
+sudo apt-get remove docker docker-engine docker.io containerd runc -y
+sudo apt-get update
+sudo apt install apt-transport-https ca-certificates curl software-properties-common git-core -y
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+sudo apt update -y
+sudo apt install docker-ce -y
+
+sudo mkdir /$USER
+cd /$USER
+
+git clone ....
+
+eleted:    datasets/oden/class_list.txt
+        deleted:    git rm datasets/oden/test.tfrecord datasets/oden/train.tfrecord datasets/oden/val.tfrecord objectdetection/object_detection_models/for_test.py objectdetection/object_detection_models/object_detection.py objectdetection/object_detection_models/yolov3/data/girl.png objectdetection/object_detection_models/yolov3/data/yolov3.weights

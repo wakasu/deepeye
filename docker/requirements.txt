@@ -1,0 +1,8 @@
+Django
+django-widget-tweaks
+opencv-python
+tensorflow-gpu
+tqdm
+celery
+asgi_redis
+channels
