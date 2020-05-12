@@ -36,9 +36,9 @@ def dataset(request):
             test_pct = form.cleaned_data['test_pct']
             memo = form.cleaned_data['memo']
 
-            p = Dataset(dataset_path=dataset_path, dataset_name=dataset_name, classes=num_classes, 
-                memo=memo, val_pct=val_pct, test_pct=test_pct)
-            p.save()
+            # p = Dataset(dataset_path=dataset_path, dataset_name=dataset_name, classes=num_classes, 
+            #     memo=memo, val_pct=val_pct, test_pct=test_pct)
+            # p.save()
 
             kitti_to_tfRecords.main(dataset_path, num_classes, val_pct, test_pct)
 
