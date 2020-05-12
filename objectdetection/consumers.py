@@ -29,11 +29,11 @@ class ObjectDetection(WebsocketConsumer):
         
         ### For Test Only###
         #self.send(text_data=json.dumps({'epoch': epoch, 'batch': batch}))
-        train_dataset = "/code/deepeye/datasets/oden/train.tfrecord"
-        val_dataset = "/code/deepeye/datasets/oden/val.tfrecord"
+        train_dataset = "/code/datasets/oden/train.tfrecord"
+        val_dataset = "/code/datasets/oden/val.tfrecord"
         tiny = False
-        classes = '/code/deepeye/datasets/oden/class_list.txt'
-        weights = '/code/deepeye/checkpoints/yolov3.tf'
+        classes = '/code/datasets/oden/class_list.txt'
+        weights = '/code/checkpoints/yolov3.tf'
         mode = 'fit'
         transfer = 'none'
         size = 416
