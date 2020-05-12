@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load widget_tweaks %}
+<style>
+  .loader {
+    display: none;
+    border: 16px solid #f3f3f3;
+    border-radius: 90%;
+    border-top: 16px solid blue;
+    border-bottom: 16px solid blue;
+    width: 60px;
+    height: 60px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+  }
+
+  .hidden {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 10px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(248,249,250); /* Fallback color */
+    background-color: rgba(248,249,250, 0.9); /* Black w/ opacity */
+  }
+
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<div id="new-dataset">
+  <form method="post" enctype="multipart/form-data" style="width:80%; height: 100%; margin: auto;">
+    {% csrf_token %}
+    <div class="form-row">
+        <label>Dataset Name</label>
+        {{ form.dataset_name|add_class:"form-control" }}
+        {{ form.dataset_name.errors }}
+        <label>No. of Classes</label>
+        {{ form.classes|add_class:"form-control" }}
+        {{ form.classes.errors }}
+        <label>Source Directory (Pleas select all files)</label>
+        {{ form.file_field|add_class:"form-control" }}
+        {{ form.file_field.errors }}
+        <label>Validation %</label>
+        {{ form.val_pct|add_class:"form-control" }}
+        {{ form.val_pct.errors }}
+        <label>Test %</label>
+        {{ form.test_pct|add_class:"form-control" }}
+        {{ form.test_pct.errors }}
+        <label>Memo</label>
+        {{ form.memo|add_class:"form-control" }}
+        {{ form.memo.errors }}
+    </div>
+    <button type="submit" id="creat-dataset" class="btn btn-primary">Creat Dataset</button>
+  </form>
+  <div class="hidden" id="loader_main">
+    <div class="loader" id="loader"></div>
+    <div id="container"></div>
+  </div>
+</div>
+
+<script>
+    document.querySelector('#creat-dataset').onclick = function (){
+        document.getElementById("loader_main").style.display = "block";
+        document.getElementById("loader").style.display = "block";
+
+        var bar = new ProgressBar.Circle(container, {
+        color: '#aaa',
+        // This has to be the same size as the maximum width to
+        // prevent clipping
+        strokeWidth: 4,
+        trailWidth: 1,
+        easing: 'easeInOut',
+        duration: 1400,
+        text: {
+          autoStyleContainer: false
+        },
+        from: { color: '#aaa', width: 1 },
+        to: { color: '#333', width: 4 },
+        // Set default step function for all animate calls
+        step: function(state, circle) {
+          circle.path.setAttribute('stroke', state.color);
+          circle.path.setAttribute('stroke-width', state.width);
+
+          var value = Math.round(circle.value() * 100);
+          if (value === 0) {
+            circle.setText('');
+          } else {
+            circle.setText(value);
+          }
+
+        }
+      });
+      bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+      bar.text.style.fontSize = '2rem';
+
+      bar.animate(1.0);  // Number from 0.0 to 1.0
+    }
+
+</script>
+
+{% endblock %}

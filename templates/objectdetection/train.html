@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load widget_tweaks %}
+
+<style>
+  .hidden {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 10px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(248,249,250); /* Fallback color */
+    background-color: rgba(248,249,250, 0.9); /* Black w/ opacity */
+  }
+  .canvas {
+		-moz-user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+    margin: 0 auto;
+	}
+
+  .loader {
+    display: none;
+    border: 16px solid #f3f3f3;
+    border-radius: 30%;
+    border-top: 16px solid blue;
+    border-bottom: 16px solid blue;
+    width: 60px;
+    height: 60px;
+    -webkit-animation: spin 2s linear infinite; /* Safari */
+    animation: spin 2s linear infinite;
+  }
+
+  /* Safari */
+  @-webkit-keyframes spin {
+    0% { -webkit-transform: rotate(0deg); }
+    100% { -webkit-transform: rotate(360deg); }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<div class="">
+  <form>
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="dataset-name">Dataset Name:</label>
+        <input type="text" class="form-control" id="dataset-name" value="Dataset1">
+        <label for="image-type">Image Type:</label>
+        <select id="image-type" class="form-control">
+          <option selected>Color</option>
+          <option>Greyscale</option>
+        </select>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="val-pct">Validation %</label>
+            <input type="number" class="form-control" id="val-pct" value=10>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="test-pct">Test %</label>
+            <input type="number" class="form-control" id="test-pct" value=10>
+          </div>
+        </div>
+        <label for="architecture">Architecture Type:</label>
+        <select id="architecture" class="form-control">
+          <option selected>YoloV3</option>
+          <option>YoloV3-Tiny</option>
+          <option>SSD</option>
+        </select>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="memo">Memo:</label><br>
+        <textarea class="form-control" id="memo" style="height: 89%;"></textarea>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="batch">Batch Size:</label>
+        <input type="number" class="form-control" id="batch" value=1>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="epoch">No. of Epochs:</label>
+        <input type="number" class="form-control" id="epoch" value=5>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-md-6">
+        <label for="learning-rate">Initial learning rate:</label>
+        <input type="number" step="0.0001" class="form-control" id="learning-rate" value=0.0001>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="optimizer">Optimizer:</label>
+        <select id="optimizer" class="form-control">
+          <option selected>adam</option>
+          <option>sgd</option>
+          <option>rmsprop</option>
+          <option>adagrad</option>
+          <option>adadelta</option>
+          <option>adam</option>
+          <option>adamax</option>
+          <option>nadam</option>
+        </select>
+      </div>
+    </div>
+  </form>
+  
+  <div id="graph-container" class="hidden">
+    <div style="width:80%; height: 100%; margin: auto;">
+      <canvas id="canvas" style="height: 600px; width: 80%"></canvas><br>
+      <textarea id="out-log" cols="50" rows="10" style="height: 100px;"></textarea>
+    </div>
+  </div>
+  <div>
+    <button id="train" class="btn btn-primary">Train</button>
+  </div>
+</div>
+
+
+<script>
+  const chatSocket = new WebSocket(
+    'ws://'
+    + window.location.host
+    + '/ws/objectdetection'
+    );
+
+ 
+  document.querySelector('#train').onclick = function (){
+    document.getElementById("graph-container").style.display = "block";
+    var ctx = document.getElementById('canvas').getContext('2d');
+    chart = Chart.Line(ctx, {
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Loss',
+          borderColor: window.chartColors.red,
+          backgroundColor: window.chartColors.red,
+          fill: false,
+          data: [],
+          yAxisID: 'y-axis-1',
+        }, {
+          label: 'Accuracy',
+          borderColor: window.chartColors.blue,
+          backgroundColor: window.chartColors.blue,
+          fill: false,
+          data: [],
+          yAxisID: 'y-axis-2'
+        }, {
+          label: 'Vaidation Loss',
+          borderColor: window.chartColors.green,
+          backgroundColor: window.chartColors.green,
+          fill: false,
+          data: [],
+          yAxisID: 'y-axis-1',
+        }, {
+          label: 'Validation Accuracy',
+          borderColor: window.chartColors.yellow,
+          backgroundColor: window.chartColors.yellow,
+          fill: false,
+          data: [],
+          yAxisID: 'y-axis-2'
+        }]
+      },
+      options: {
+        responsive: true,
+        hoverMode: 'index',
+        stacked: false,
+        title: {
+          display: true,
+          text: 'Training'
+        },
+        scales: {
+          yAxes: [{
+            type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+            display: true,
+            position: 'left',
+            id: 'y-axis-1',
+            ticks: {
+              suggestedMin: 0,
+              suggestedMax: 1
+            }
+          }, {
+            type: 'linear', // only linear but allow scale type registration. This allows extensions to exist solely for log scale for instance
+            display: true,
+            position: 'right',
+            id: 'y-axis-2',
+            ticks: {
+              suggestedMin: 0,
+              suggestedMax: 0.5
+            },
+
+            // grid line settings
+            gridLines: {
+              drawOnChartArea: false, // only want the grid lines for one axis to show up
+            },
+          }],
+        }
+      }
+    });
+
+    // For sendding data
+    const dataset_name = document.querySelector('#dataset-name').value;
+    const image_type = document.querySelector('#image-type').value;
+    const val_pct = document.querySelector('#val-pct').value;
+    const test_pct = document.querySelector('#test-pct').value;
+    const memo = document.querySelector('#memo').value;
+    const architecture = document.querySelector('#architecture').value;
+    const epoch = document.querySelector('#epoch').value;
+    const batch = document.querySelector('#batch').value;
+    const learning_rate = document.querySelector('#learning-rate').value;
+    const optimizer = document.querySelector('#optimizer').value;
+
+    chatSocket.send(JSON.stringify({
+      'dataset_name': dataset_name, 'image_type': image_type, 'val_pct': val_pct,
+      'test_pct': test_pct, 'memo': memo, 'architecture': architecture,
+      'epoch': epoch, 'batch': batch, 
+      'learning_rate':learning_rate, 'optimizer': optimizer
+      }));
+    };
+
+//////////////////////////////////////
+  chatSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+
+    
+    /// Batch Graph
+    if (typeof data.batch !== "undefined"){
+      document.getElementById("out-log").scrollTop = document.getElementById("out-log").scrollHeight;
+      document.querySelector('#out-log').value += ("Batch: " + data.batch + "\t" + "\t" +"Loss: " 
+                            + data.loss + "\t" + "\t" +"Accuracy: " + data.acc + '\n');
+      function updateConfigByMutating(chart) {
+        chart.data.datasets[0].data.push(data.loss);
+        chart.data.datasets[1].data.push(data.acc);
+        chart.data.labels.push(data.batch);
+        chart.update();
+      };
+      updateConfigByMutating(chart);
+    };
+    // Epoch Graph
+    if (typeof data.epoch !== "undefined"){      
+      document.getElementById("out-log").scrollTop = document.getElementById("out-log").scrollHeight;
+      document.querySelector('#out-log').value += ("Epoch: " + data.epoch + "\t" + "\t" +"Loss: " 
+                             + data.loss + "\t" + "\t" + "Validation Loss: " + data.val_loss + "\t" + "\t" 
+                             + "Accuracy: " + data.acc + "\t" + "\t" + "Validation Accuracy: " + data.val_acc + '\n');
+      function updateConfigByMutating(chart) {
+        chart.data.datasets[0].data.push(data.loss);
+        chart.data.datasets[1].data.push(data.acc);
+        chart.data.datasets[2].data.push(data.val_loss);
+        chart.data.datasets[3].data.push(data.val_acc);
+        chart.data.labels.push(data.epoch);
+        chart.update();
+      };
+      updateConfigByMutating(chart);
+    };
+
+		
+  };
+/////////////////////////////////////
+  chatSocket.onclose = function(e) {
+      console.error('Chat socket closed unexpectedly');
+  };
+
+  
+
+</script>
+
+
+{% endblock %}

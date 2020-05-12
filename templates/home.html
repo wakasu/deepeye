@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container-fluid">
+  <div class="card-columns">
+    <a href="{% url 'home' %}" class="card text-white text-center " style="display: block; text-decoration: none; ">
+      <img class="card-img" src="{% static 'img/technology-photo-1.png' %}" style="max-height: 300px;">
+      <div class="card-img-overlay ">
+        <hr>
+        <img src="{% static 'img/technology-icon-1.svg' %}">
+        <hr>
+        <h4 class="card-title">Image Classification</h4>
+        <h5 class="card-title">画像分類</h5>
+      </div>
+    </a>
+    <a href="{% url 'objectdetection-dataset' %}" class="card text-white text-center" style="display: block; text-decoration: none; ">
+      <img class="card-img" src="{% static 'img/technology-photo-2.png' %}" style="max-height:300px;">
+      <div class="card-img-overlay ">
+        <hr>
+        <img src="{% static 'img/technology-icon-2.svg' %}">
+        <hr>
+        <h4 class="card-title">Object Detection</h4>
+        <h5 class="card-title">物体検出</h5>
+      </div>
+    </a>
+    <a href="{% url 'home' %}" class="card text-white text-center" style="display: block; text-decoration: none; ">
+      <img class="card-img" src="{% static 'img/technology-photo-3.png' %}" style="max-height: 300px;">
+      <div class="card-img-overlay ">
+        <hr>
+        <img src="{% static 'img/technology-icon-3.svg' %}">
+        <hr>
+        <h4 class="card-title">Segmentation</h4>
+        <h5 class="card-title">セグメンテーション</h5>
+      </div>
+    </a>
+  </div>
+  
+</div>
+
+  
+{% endblock %}
